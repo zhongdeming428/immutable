@@ -1,0 +1,50 @@
+import { TrieList } from "../index";
+
+describe(`run`, () => {
+  const list = new TrieList();
+
+  it(`can pushBack`, () => {
+    const newList1 = list.pushBack(123);
+    expect(list).toBeTruthy();
+    expect(newList1.length).toBe(1);
+    const newList2 = newList1.pushBack(321);
+    expect(newList2.length).toBe(2);
+    const newList3 = newList1.pushBack(333);
+    expect(newList3.length).toBe(2);
+  });
+  it(`can get`, () => {
+    let newList = list.pushBack("123").pushBack(321);
+    const item0 = newList.get(0);
+    const item1 = newList.get(1);
+    expect(item0).toEqual("123");
+    expect(item1).toEqual(321);
+    newList = newList.pushBack(456);
+    const item2 = newList.get(2);
+    expect(item2).toEqual(456);
+    expect(newList.length).toEqual(3);
+  });
+  it(`can set`, () => {
+    const newList = list.pushBack("123").pushBack("333");
+    expect(newList.length).toEqual(2);
+    expect(newList.get(0)).toEqual("123");
+    expect(newList.get(0)).not.toEqual(123);
+    const newList1 = newList.set(1, "321");
+    expect(newList1.length).toStrictEqual(2);
+    expect(newList1.get(1)).toEqual("321");
+    expect(newList1.get(1)).not.toEqual(321);
+  });
+  it(`can iterate`, () => {
+    const res = [];
+    const newList = list.pushBack(1).pushBack(2).pushBack(3);
+    newList.forEach((val) => {
+      res.push(val);
+    });
+    expect(res).toEqual([1, 2, 3]);
+    expect(res.length === 3);
+  });
+  it(`can removeBack`, () => {
+    const newList = list.pushBack(1).pushBack(2).removeBack();
+    expect(newList.length === 1).toBeTruthy();
+    expect(newList.get(0) === 1).toBeTruthy();
+  });
+});

@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "importHelpers": true,
+    "outDir": "dist",
+    "target": "ES6"
+  }
+}
