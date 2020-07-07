@@ -72,11 +72,17 @@ export class TrieList<T = any> {
     return newList;
   }
 
-  pushBack(value: T): TrieList<T> {
+  pushBack(this: TrieList<T>, ...values: Array<T>): TrieList<T> {
     if (this.head.len > this.head.maxSize) 
       throw new Error('Exceeded the max size of list!');
-    const idx = this.length;
-    return this.set(idx, value);
+
+    let newList = this;
+
+    for (let idx = 0; idx < values.length; idx++) {
+      const offset = idx + this.length;
+      newList = newList.set(offset, values[idx]);
+    }
+    return newList;
   }
 
   removeBack(): TrieList<T> {

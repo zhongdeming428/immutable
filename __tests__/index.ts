@@ -11,6 +11,10 @@ describe(`run`, () => {
     expect(newList2.length).toBe(2);
     const newList3 = newList1.pushBack(333);
     expect(newList3.length).toBe(2);
+    const newList4 = list.pushBack(1, 2, 3);
+    expect(newList4.get(0)).toEqual(1);
+    expect(newList4.get(1)).toEqual(2);
+    expect(newList4.get(2)).toEqual(3);
   });
   it(`can get`, () => {
     let newList = list.pushBack("123").pushBack(321);
@@ -46,5 +50,26 @@ describe(`run`, () => {
     const newList = list.pushBack(1).pushBack(2).removeBack();
     expect(newList.length === 1).toBeTruthy();
     expect(newList.get(0) === 1).toBeTruthy();
+  });
+  it(`can persist`, () => {
+    const obj1 = {};
+    const obj2 = [];
+    const obj3 = new Date();
+    const newList1 = list.pushBack(obj1, obj2, obj3);
+    const newList2 = newList1.set(1, [1]);
+    expect(newList1.get(0) === newList2.get(0)).toBeTruthy();
+    expect(newList1.get(2) === newList2.get(2)).toBeTruthy();
+    expect(newList2.get(1) === newList1.get(1)).toBeFalsy();
+    expect(newList1.get(1)).toEqual([]);
+    expect(newList2.get(1)).toEqual([1]);
+  });
+  it(`test large data`, () => {
+    let newList = new TrieList<number>();
+    for (let i = 0; i < 10000; i++) {
+      newList = newList.pushBack(i);
+    }
+    expect(newList.length).toEqual(10000);
+    expect(newList.get(9999) === 9999).toBeTruthy();
+    expect(newList.set(9999, 1).get(9999)).toEqual(1);
   });
 });
