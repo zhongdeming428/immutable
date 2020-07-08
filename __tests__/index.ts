@@ -50,6 +50,11 @@ describe(`run`, () => {
     const newList = list.pushBack(1).pushBack(2).removeBack();
     expect(newList.length === 1).toBeTruthy();
     expect(newList.get(0) === 1).toBeTruthy();
+    let newList1 = list.pushBack(1 ,2 ,3);
+    newList1 = newList1.removeBack();
+    expect(newList1.length === 2 && newList1.get(1) === 2).toBeTruthy();
+    newList1 = newList1.removeBack();
+    expect(newList1.length === 1 && newList1.get(0) === 1).toBeTruthy();
   });
   it(`can persist`, () => {
     const obj1 = {};

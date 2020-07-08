@@ -3,10 +3,7 @@ import { setNodeInTrie, getNodeInTrie, makeList } from './utils/index';
 
 /**
  * TODO:
- * -  splice
- * -  slice
- * -  shift/unshift
- * -  reduce
+ * -  空间压缩优化
  * -  tail 优化
  * -  transients 优化
  */
@@ -14,9 +11,9 @@ export class TrieNode<T = unknown> {
   private nodeArr: Array<T | TrieNode<T>>;
   constructor(arr?: Array<T | TrieNode<T>>) {
     if (arr) {
-      this.nodeArr = [...arr];
+      this.nodeArr = [...arr.slice(0, NODE_SIZE)];
     } else {
-      this.nodeArr = new Array(NODE_SIZE);
+      this.nodeArr = [];
     }
   }
 
@@ -25,6 +22,7 @@ export class TrieNode<T = unknown> {
   }
 
   set(idx: number, value: T | TrieNode<T>) {
+    if (idx > NODE_SIZE - 1) return;
     this.nodeArr[idx] = value;
   }
 

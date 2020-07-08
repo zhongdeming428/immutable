@@ -2,12 +2,16 @@
   "devDependencies": {
     "@babel/preset-env": "^7.10.3",
     "@babel/preset-typescript": "^7.10.1",
+    "@types/benchmark": "^1.0.33",
     "@types/jest": "^26.0.3",
     "@types/node": "^14.0.14",
+    "benchmark": "^2.1.4",
     "jest": "^26.1.0",
     "typescript": "^3.9.5"
   },
   "scripts": {
-    "test": "npx jest"
+    "test": "npx jest",
+    "build": "tsc",
+    "benchmark": "node ./benchmark/index.js"
   }
 }

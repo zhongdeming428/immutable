@@ -1,8 +1,18 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "importHelpers": true,
+    "baseUrl": "./",
     "outDir": "dist",
-    "target": "ES6"
-  }
+    "target": "ES5",
+    "alwaysStrict": true,
+    "module": "commonjs",
+    "lib": [
+      "ES6"
+    ],
+    "removeComments": true,
+    "noImplicitAny": true
+  },
+  "include": [
+    "utils/**/*.ts",
+    "index.ts"
+  ],
 }
