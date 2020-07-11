@@ -3,12 +3,32 @@ const TrieList = require('../dist/index').TrieList;
 
 const suite1 = new Suite();
 
+const trieList = new TrieList(null, 2 ** 32 - 1);
+
 suite1
-  .add(`create trie list`, () => {
-    const list = new TrieList();
+  .add(`set 10`, () => {
+    trieList.set(10, 1);
   })
-  .add(`create array`, () => {
-    const arr = [];
+  .add(`set 100`, () => {
+    trieList.set(100, 1);
+  })
+  .add(`set 1000`, () => {
+    trieList.set(1000, 1);
+  })
+  .add(`set 10000`, () => {
+    trieList.set(10000, 1);
+  })
+  .add(`set 100000`, () => {
+    trieList.set(100000, 1);
+  })
+  .add(`set 1000000`, () => {
+    trieList.set(1000000, 1);
+  })
+  .add(`set 10000000`, () => {
+    trieList.set(100000, 1);
+  })
+  .add(`set 100000000`, () => {
+    trieList.set(1000000, 1);
   })
   .on('cycle', function(event) {
     console.log(String(event.target));

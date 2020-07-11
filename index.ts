@@ -3,7 +3,6 @@ import { setNodeInTrie, getNodeInTrie, makeList } from './utils/index';
 
 /**
  * TODO:
- * -  空间压缩优化
  * -  tail 优化
  * -  transients 优化
  */
