@@ -1,4 +1,4 @@
-import { SHIFT, MASK } from './constants';
+import { SHIFT, MASK, NODE_SIZE } from './constants';
 import { TrieNode, TrieList } from '../index';
 
 /**
@@ -25,22 +25,31 @@ export function getNodeInTrie<T>(node: TrieNode, idx: number, curLevel: number):
  * @param node 
  * @param idx 
  * @param curLevel 
+ * @param targetLevel 决定到哪个 level 停止
  */
-export function setNodeInTrie<T>(node: TrieNode<T>, idx: number, curLevel: number, value: T): TrieNode<T> {
+export function setNodeInTrie<T>(node: TrieNode<T>, idx: number, curLevel: number, value: T | TrieNode<T>, targetLevel = 0): TrieNode<T> {
   let level = curLevel - 1,
-    curIdx = ((idx >> (level * SHIFT)) & MASK),
+    curIdx = (idx >> (level * SHIFT)) & MASK,
     curNode = !node ? new TrieNode<T>() : node.clone();
 
-  if (level === 0) {
+  if (level === targetLevel) {
     curNode.set(curIdx, value);
   } else {
     curNode.set(curIdx, curNode.get(curIdx));
-    const newNode = setNodeInTrie(curNode.get(curIdx) as TrieNode<T>, idx, level, value);
+    const newNode = setNodeInTrie(curNode.get(curIdx) as TrieNode<T>, idx, level, value, targetLevel);
     curNode.set(curIdx, newNode as TrieNode<T>);
   }
   return curNode;
 }
 
-export function makeList<T>(root: TrieNode<T>, len: number) {
+export function makeList<T>(root: TrieNode<T>, len: number, ) {
   return new TrieList<T>(root, len);
+}
+
+/**
+ * 获取当前 len 对应的 tail 开始索引
+ * @param len 
+ */
+export function getTailOffset(len: number) {
+  return len < NODE_SIZE ? 0 : ((len - 1) >>> SHIFT) << SHIFT;
 }

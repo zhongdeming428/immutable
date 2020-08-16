@@ -74,7 +74,19 @@ describe(`run`, () => {
       newList = newList.pushBack(i);
     }
     expect(newList.length).toEqual(10000);
+    for (let i = 0; i < 10000; i++) {
+      expect(newList.get(i)).toEqual(i);
+    }
     expect(newList.get(9999) === 9999).toBeTruthy();
     expect(newList.set(9999, 1).get(9999)).toEqual(1);
+
+    // const maxLength = TrieList.maxSize;
+    // let newList1 = new TrieList();
+    // for (let i = 0; i < maxLength; i++) {
+    //   newList1 = newList1.pushBack(i);
+    // }
+    // for (let i = 0; i < maxLength; i++) {
+    //   expect(newList1.get(i)).toEqual(i);
+    // }
   });
 });

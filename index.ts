@@ -1,8 +1,9 @@
 import { NODE_SIZE, SHIFT } from './utils/constants';
-import { setNodeInTrie, getNodeInTrie, makeList } from './utils/index';
+import { setNodeInTrie, getNodeInTrie, makeList, getTailOffset } from './utils/index';
 
 /**
  * TODO:
+ * -  TrieNode 长度控制
  * -  tail 优化
  * -  transients 优化
  */
@@ -16,33 +17,42 @@ export class TrieNode<T = unknown> {
     }
   }
 
+  public get length() {
+    return this.nodeArr.length;
+  }
+
   clone(): TrieNode<T> {
     return new TrieNode(this.nodeArr);
   }
 
   set(idx: number, value: T | TrieNode<T>) {
     if (idx > NODE_SIZE - 1) return;
+    if (idx === this.length && value === undefined) 
+      this.nodeArr.length -= 1;
     this.nodeArr[idx] = value;
   }
 
   get(idx: number): T | undefined | TrieNode<T> {
     return this.nodeArr[idx];
   }
+
+  toArray(): Array<T> {
+    return this.nodeArr as Array<T>;
+  }
 }
 
 export class TrieList<T = any> {
+  static readonly maxSize = 1 << (SHIFT * SHIFT);
   private head = {
     level: SHIFT,
     len: 0,
     root: new TrieNode<T>(),
-    maxSize: 1 << (SHIFT * SHIFT)
+    tail: null as TrieNode<T>
   };
 
   constructor(root?: TrieNode<T>, len?: number) {
-    if (root)
-      this.head.root = root;
-    if (len)
-      this.head.len = len;
+    root && (this.head.root = root);
+    len && (this.head.len = len);
   }
 
   public get length(): number {
@@ -58,19 +68,39 @@ export class TrieList<T = any> {
   }
 
   get(idx: number): T | undefined {
-    if (idx > this.head.len - 1 || idx < 0) return;
-    return getNodeInTrie<T>(this.root, idx, this.level) as (T | undefined);
+    if (idx > this.length - 1 || idx < 0) return;
+    const tailOffset = getTailOffset(this.length);
+    if (idx < tailOffset) {
+      return getNodeInTrie<T>(this.root, idx, this.level) as (T | undefined);
+    } else {
+      return this.head.tail.get(idx - tailOffset) as (T | undefined);
+    }
   }
 
   set(idx: number, value: T): TrieList<T> {
     if (idx < 0 || idx > this.length) return;
-    const newRoot = setNodeInTrie<T>(this.root, idx, this.level, value);
-    const newList = makeList(newRoot, idx === this.length ? this.length + 1 : this.length);
-    return newList;
+    const tailOffset = getTailOffset(this.length);
+    const newLength = idx === this.length ? this.length + 1 : this.length;
+    if (idx < tailOffset) {
+      const newRoot = setNodeInTrie<T>(this.root, idx, this.level, value);
+      const newList = makeList(newRoot, newLength);
+      return newList;
+    } else {
+      if ((this.head.tail?.length ?? 0) < NODE_SIZE) {
+        const newTail = this.head.tail?.clone() ?? new TrieNode();
+        newTail.set(idx - tailOffset, value);
+        const newList = makeList(this.root, newLength);
+        newList.head.tail = newTail;
+        return newList;
+      } else {
+        const newRoot = setNodeInTrie<T>(this.root, tailOffset, this.level, this.head.tail, 1);
+        const newList = makeList(newRoot, newLength);
+        return newList.set(idx, value);
+      }
+    }
   }
-
   pushBack(this: TrieList<T>, ...values: Array<T>): TrieList<T> {
-    if (this.head.len > this.head.maxSize) 
+    if (this.length > TrieList.maxSize) 
       throw new Error('Exceeded the max size of list!');
 
     let newList = this;
@@ -83,7 +113,6 @@ export class TrieList<T = any> {
   }
 
   removeBack(): TrieList<T> {
-    // TODO:
     const idx = this.length;
     const newList = this.set(idx - 1, undefined);
     newList.head.len -= 1;
@@ -98,7 +127,7 @@ export class TrieList<T = any> {
   }
 
   map<K>(callback: (value: T, idx: number, list: TrieList) => K, ctx?: {}): Array<K> {
-    const result = [];
+    const result: Array<K> = [];
     this.forEach((value, idx, list) => {
       const res = callback.call(ctx, value, idx, list);
       result.push(res);
