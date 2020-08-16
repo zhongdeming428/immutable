@@ -15,7 +15,7 @@ export function getNodeInTrie<T>(node: TrieNode, idx: number, curLevel: number):
   if (level === 0) {
     return curNode.get(curIdx) as T;
   } else {
-    if (!curNode.get(curIdx)) return;
+    if (curNode.get(curIdx) === void 0) return;
     return getNodeInTrie(curNode.get(curIdx) as TrieNode<T>, idx, level);
   }
 }
@@ -35,15 +35,15 @@ export function setNodeInTrie<T>(node: TrieNode<T>, idx: number, curLevel: numbe
   if (level === targetLevel) {
     curNode.set(curIdx, value);
   } else {
-    curNode.set(curIdx, curNode.get(curIdx));
+    curNode.set(curIdx, curNode.get(curIdx) ?? new TrieNode<T>());
     const newNode = setNodeInTrie(curNode.get(curIdx) as TrieNode<T>, idx, level, value, targetLevel);
     curNode.set(curIdx, newNode as TrieNode<T>);
   }
   return curNode;
 }
 
-export function makeList<T>(root: TrieNode<T>, len: number, ) {
-  return new TrieList<T>(root, len);
+export function makeList<T>(root: TrieNode<T>, len: number, tail?: TrieNode<T>) {
+  return new TrieList<T>(root, len, tail);
 }
 
 /**

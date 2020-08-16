@@ -80,13 +80,16 @@ describe(`run`, () => {
     expect(newList.get(9999) === 9999).toBeTruthy();
     expect(newList.set(9999, 1).get(9999)).toEqual(1);
 
-    // const maxLength = TrieList.maxSize;
-    // let newList1 = new TrieList();
-    // for (let i = 0; i < maxLength; i++) {
-    //   newList1 = newList1.pushBack(i);
-    // }
-    // for (let i = 0; i < maxLength; i++) {
-    //   expect(newList1.get(i)).toEqual(i);
-    // }
+    let newList2 = new TrieList<number>();
+    const arr = [];
+    for (let i = 0; i < 10000; i++) {
+      const num = Math.random();
+      arr.push(num);
+      newList2 = newList2.pushBack(num);
+    }
+    console.log(JSON.stringify(newList2))
+    for (let i = 0; i < 10000; i++) {
+      expect(arr[i] === newList2.get(i)).toBeTruthy();
+    }
   });
 });

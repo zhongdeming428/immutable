@@ -3,15 +3,13 @@ import { setNodeInTrie, getNodeInTrie, makeList, getTailOffset } from './utils/i
 
 /**
  * TODO:
- * -  TrieNode 长度控制
- * -  tail 优化
- * -  transients 优化
+ * -  transients 优化: 在每个 trienode 上加 ownerID
  */
 export class TrieNode<T = unknown> {
   private nodeArr: Array<T | TrieNode<T>>;
   constructor(arr?: Array<T | TrieNode<T>>) {
     if (arr) {
-      this.nodeArr = [...arr.slice(0, NODE_SIZE)];
+      this.nodeArr = arr.slice(0, NODE_SIZE);
     } else {
       this.nodeArr = [];
     }
@@ -27,8 +25,10 @@ export class TrieNode<T = unknown> {
 
   set(idx: number, value: T | TrieNode<T>) {
     if (idx > NODE_SIZE - 1) return;
-    if (idx === this.length && value === undefined) 
-      this.nodeArr.length -= 1;
+    if (idx === this.length && value === undefined) {
+      this.nodeArr.length > 0 && (this.nodeArr.length -= 1);
+      return;
+    }
     this.nodeArr[idx] = value;
   }
 
@@ -50,9 +50,10 @@ export class TrieList<T = any> {
     tail: null as TrieNode<T>
   };
 
-  constructor(root?: TrieNode<T>, len?: number) {
+  constructor(root?: TrieNode<T>, len?: number, tail?: TrieNode<T>) {
     root && (this.head.root = root);
     len && (this.head.len = len);
+    tail && (this.head.tail = tail);
   }
 
   public get length(): number {
@@ -67,33 +68,38 @@ export class TrieList<T = any> {
     return this.head.root;
   }
 
+  public get tail() {
+    return this.head.tail;
+  }
+
+  private get tailOffset() {
+    return getTailOffset(this.length);
+  }
+
   get(idx: number): T | undefined {
     if (idx > this.length - 1 || idx < 0) return;
-    const tailOffset = getTailOffset(this.length);
-    if (idx < tailOffset) {
+    if (idx < this.tailOffset) {
       return getNodeInTrie<T>(this.root, idx, this.level) as (T | undefined);
     } else {
-      return this.head.tail.get(idx - tailOffset) as (T | undefined);
+      return this.tail.get(idx - this.tailOffset) as (T | undefined);
     }
   }
 
   set(idx: number, value: T): TrieList<T> {
     if (idx < 0 || idx > this.length) return;
-    const tailOffset = getTailOffset(this.length);
     const newLength = idx === this.length ? this.length + 1 : this.length;
-    if (idx < tailOffset) {
+    if (idx < this.tailOffset) {
       const newRoot = setNodeInTrie<T>(this.root, idx, this.level, value);
-      const newList = makeList(newRoot, newLength);
+      const newList = makeList(newRoot, newLength, this.tail);
       return newList;
     } else {
-      if ((this.head.tail?.length ?? 0) < NODE_SIZE) {
-        const newTail = this.head.tail?.clone() ?? new TrieNode();
-        newTail.set(idx - tailOffset, value);
-        const newList = makeList(this.root, newLength);
-        newList.head.tail = newTail;
+      if ((this.tail?.length ?? 0) < NODE_SIZE) {
+        const newTail = this.tail?.clone() ?? new TrieNode();
+        newTail.set(idx - this.tailOffset, value);
+        const newList = makeList(this.root, newLength, newTail);
         return newList;
       } else {
-        const newRoot = setNodeInTrie<T>(this.root, tailOffset, this.level, this.head.tail, 1);
+        const newRoot = setNodeInTrie<T>(this.root, this.tailOffset, this.level, this.tail, 1);
         const newList = makeList(newRoot, newLength);
         return newList.set(idx, value);
       }
