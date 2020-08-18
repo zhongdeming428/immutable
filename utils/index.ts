@@ -53,3 +53,6 @@ export function makeList<T>(root: TrieNode<T>, len: number, tail?: TrieNode<T>) 
 export function getTailOffset(len: number) {
   return len < NODE_SIZE ? 0 : ((len - 1) >>> SHIFT) << SHIFT;
 }
+
+/**generate owner id */
+export class OwnerID {}

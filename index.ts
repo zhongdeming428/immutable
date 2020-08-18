@@ -1,5 +1,5 @@
 import { NODE_SIZE, SHIFT } from './utils/constants';
-import { setNodeInTrie, getNodeInTrie, makeList, getTailOffset } from './utils/index';
+import { setNodeInTrie, getNodeInTrie, makeList, getTailOffset, OwnerID } from './utils/index';
 
 /**
  * TODO:
@@ -7,6 +7,7 @@ import { setNodeInTrie, getNodeInTrie, makeList, getTailOffset } from './utils/i
  */
 export class TrieNode<T = unknown> {
   private nodeArr: Array<T | TrieNode<T>>;
+  public ownerID: OwnerID;
   constructor(arr?: Array<T | TrieNode<T>>) {
     if (arr) {
       this.nodeArr = arr.slice(0, NODE_SIZE);
@@ -43,6 +44,8 @@ export class TrieNode<T = unknown> {
 
 export class TrieList<T = any> {
   static readonly maxSize = 1 << (SHIFT * SHIFT);
+  public __ownerID: OwnerID;
+  public __altered = false;
   private head = {
     level: SHIFT,
     len: 0,
@@ -143,5 +146,25 @@ export class TrieList<T = any> {
 
   toArray(): Array<T> {
     return this.map(v => v);
+  }
+
+  asMutable() {
+    return this.__ownerID ? this : makeList(this.root, this.length, this.tail);
+  }
+
+  withMutations(fn: (list: TrieList) => TrieList) {
+    const mutable = this.asMutable();
+    fn(mutable);
+    if (!mutable.__altered) {
+      return this;
+    }
+    if (!this.__ownerID && this.__ownerID !== mutable.__ownerID) {
+      mutable.__altered = false;
+      mutable.__ownerID = this.__ownerID;
+      return mutable;
+    }
+    return mutable.__ownerID === this.__ownerID ?
+      mutable :
+      makeList(this.root, this.length, this.tail);
   }
 }
