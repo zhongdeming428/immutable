@@ -42,8 +42,13 @@ export function setNodeInTrie<T>(node: TrieNode<T>, idx: number, curLevel: numbe
   return curNode;
 }
 
-export function makeList<T>(root: TrieNode<T>, len: number, tail?: TrieNode<T>) {
-  return new TrieList<T>(root, len, tail);
+export function makeList<T>(root: TrieNode<T>, len: number, tail?: TrieNode<T>, ownerID?: OwnerID) {
+  const list = new TrieList<T>();
+  list.root = root;
+  list.tail = tail;
+  list.length = len;
+  list.__ownerID = ownerID;
+  return list;
 }
 
 /**

@@ -46,34 +46,10 @@ export class TrieList<T = any> {
   static readonly maxSize = 1 << (SHIFT * SHIFT);
   public __ownerID: OwnerID;
   public __altered = false;
-  private head = {
-    level: SHIFT,
-    len: 0,
-    root: new TrieNode<T>(),
-    tail: null as TrieNode<T>
-  };
-
-  constructor(root?: TrieNode<T>, len?: number, tail?: TrieNode<T>) {
-    root && (this.head.root = root);
-    len && (this.head.len = len);
-    tail && (this.head.tail = tail);
-  }
-
-  public get length(): number {
-    return this.head.len;
-  }
-
-  public get level(): number {
-    return this.head.level;
-  }
-
-  public get root() {
-    return this.head.root;
-  }
-
-  public get tail() {
-    return this.head.tail;
-  }
+  public length = 0;
+  public level = SHIFT;
+  public root = new TrieNode<T>();
+  public tail = null as TrieNode<T>;
 
   private get tailOffset() {
     return getTailOffset(this.length);
@@ -124,12 +100,12 @@ export class TrieList<T = any> {
   removeBack(): TrieList<T> {
     const idx = this.length;
     const newList = this.set(idx - 1, undefined);
-    newList.head.len -= 1;
+    newList.length -= 1;
     return newList;
   }
 
   forEach(callback: (value: T, idx: number, list: TrieList) => void, ctx?: {}) {
-    const len = this.head.len;
+    const len = this.length;
     for (let i = 0; i < len; i++) {
       callback.call(ctx, this.get(i), i, this);
     }
@@ -149,7 +125,7 @@ export class TrieList<T = any> {
   }
 
   asMutable() {
-    return this.__ownerID ? this : makeList(this.root, this.length, this.tail);
+    return this.__ownerID ? this : makeList(this.root, this.length, this.tail, new OwnerID());
   }
 
   withMutations(fn: (list: TrieList) => TrieList) {
@@ -158,7 +134,7 @@ export class TrieList<T = any> {
     if (!mutable.__altered) {
       return this;
     }
-    if (!this.__ownerID && this.__ownerID !== mutable.__ownerID) {
+    if (!this.__ownerID) {
       mutable.__altered = false;
       mutable.__ownerID = this.__ownerID;
       return mutable;
