@@ -87,7 +87,6 @@ describe(`run`, () => {
       arr.push(num);
       newList2 = newList2.pushBack(num);
     }
-    console.log(JSON.stringify(newList2))
     for (let i = 0; i < 10000; i++) {
       expect(arr[i] === newList2.get(i)).toBeTruthy();
     }
