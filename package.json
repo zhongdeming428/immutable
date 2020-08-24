@@ -13,5 +13,15 @@
     "test": "npx jest",
     "build": "tsc",
     "benchmark": "node ./benchmark/index.js"
+  },
+  "jest": {
+    "verbose": true,
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "index.ts",
+      "utils/**"
+    ],
+    "coverageDirectory": ".coverage",
+    "coverageReporters": ["html", "text"]
   }
 }

@@ -42,14 +42,16 @@ export function setNodeInTrie<T>(node: TrieNode<T>, idx: number, curLevel: numbe
   return curNode;
 }
 
+// 根据现有条件创建下一个 list 实例
 export function makeList<T>(root: TrieNode<T>, len: number, tail?: TrieNode<T>, ownerID?: OwnerID, list?: TrieList<T>) {
-  const altered = !(list && ownerID && list.__ownerID === ownerID);
-  const newList = !altered ? list : new TrieList<T>();
+  // 如果 ownerID 相同的话，直接复用旧的 list，否则创建新的实例
+  const altered = list && ownerID && list.__ownerID === ownerID;
+  const newList = altered ? list : new TrieList<T>();
   newList.root = root;
   newList.tail = tail;
   newList.length = len;
   newList.__ownerID = ownerID;
-  newList.__altered = altered;
+  newList.__altered = !!altered;
   return newList;
 }
 

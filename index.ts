@@ -1,10 +1,6 @@
 import { NODE_SIZE, SHIFT } from './utils/constants';
 import { setNodeInTrie, getNodeInTrie, makeList, getTailOffset, OwnerID } from './utils/index';
 
-/**
- * TODO:
- * -  transients 优化: 在每个 trienode 上加 ownerID
- */
 export class TrieNode<T = unknown> {
   private nodeArr: Array<T | TrieNode<T>>;
   public ownerID: OwnerID;
@@ -94,7 +90,6 @@ export class TrieList<T = any> {
         for (let idx = 0; idx < values.length; idx++) {
           const offset = idx + this.length;
           list.set(offset, values[idx]);
-          return list;
         }
       });
     }
@@ -133,7 +128,7 @@ export class TrieList<T = any> {
     return this.__ownerID ? this : makeList(this.root, this.length, this.tail, new OwnerID());
   }
 
-  withMutations(fn: (list: TrieList) => TrieList) {
+  withMutations(fn: (list: TrieList) => void) {
     const mutable = this.asMutable();
     fn(mutable);
     if (!mutable.__altered) {
