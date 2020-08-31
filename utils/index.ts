@@ -27,28 +27,32 @@ export function getNodeInTrie<T>(node: TrieNode, idx: number, curLevel: number):
  * @param curLevel 
  * @param targetLevel 决定到哪个 level 停止
  */
-export function setNodeInTrie<T>(node: TrieNode<T>, idx: number, curLevel: number, value: T | TrieNode<T>, targetLevel = 0): TrieNode<T> {
+export function setNodeInTrie<T>(node: TrieNode<T>, idx: number, curLevel: number, value: T | TrieNode<T>, targetLevel = 0, ownerID = new OwnerID()): TrieNode<T> {
   let level = curLevel - 1,
     curIdx = (idx >> (level * SHIFT)) & MASK,
-    curNode = !node ? new TrieNode<T>() : node.clone();
+    curNode = !node ? new TrieNode<T>([], ownerID) : node.makeEditable(ownerID);
 
   if (level === targetLevel) {
     curNode.set(curIdx, value);
   } else {
-    curNode.set(curIdx, curNode.get(curIdx) ?? new TrieNode<T>());
-    const newNode = setNodeInTrie(curNode.get(curIdx) as TrieNode<T>, idx, level, value, targetLevel);
+    curNode.set(curIdx, curNode.get(curIdx) ?? new TrieNode<T>([], ownerID));
+    const newNode = setNodeInTrie(curNode.get(curIdx) as TrieNode<T>, idx, level, value, targetLevel, ownerID);
     curNode.set(curIdx, newNode as TrieNode<T>);
   }
   return curNode;
 }
 
-export function makeList<T>(root: TrieNode<T>, len: number, tail?: TrieNode<T>, ownerID?: OwnerID) {
-  const list = new TrieList<T>();
-  list.root = root;
-  list.tail = tail;
-  list.length = len;
-  list.__ownerID = ownerID;
-  return list;
+// 根据现有条件创建下一个 list 实例
+export function makeList<T>(root: TrieNode<T>, len: number, tail?: TrieNode<T>, ownerID?: OwnerID, list?: TrieList<T>) {
+  // 如果 ownerID 相同的话，直接复用旧的 list，否则创建新的实例
+  const altered = list && ownerID && list.__ownerID === ownerID;
+  const newList = altered ? list : new TrieList<T>();
+  newList.root = root;
+  newList.tail = tail;
+  newList.length = len;
+  newList.__ownerID = ownerID;
+  newList.__altered = !!altered;
+  return newList;
 }
 
 /**

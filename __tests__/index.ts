@@ -15,6 +15,20 @@ describe(`run`, () => {
     expect(newList4.get(0)).toEqual(1);
     expect(newList4.get(1)).toEqual(2);
     expect(newList4.get(2)).toEqual(3);
+    const pushBackItems = [];
+    for (let i = 0; i < 1000; i++) {
+      pushBackItems[i] = i;
+    }
+    const newList5 = list.pushBack(...pushBackItems);
+    const newList6 = newList5.withMutations(list => {
+      for (let i = 0; i < 1000; i++) {
+        list.set(i, i + 5);
+      }
+    });
+    for (let i = 0; i < 1000; i++) {
+      expect(newList5.get(i)).toEqual(i);
+      expect(newList6.get(i) - newList5.get(i)).toEqual(5);
+    }
   });
   it(`can get`, () => {
     let newList = list.pushBack("123").pushBack(321);
@@ -87,7 +101,6 @@ describe(`run`, () => {
       arr.push(num);
       newList2 = newList2.pushBack(num);
     }
-    console.log(JSON.stringify(newList2))
     for (let i = 0; i < 10000; i++) {
       expect(arr[i] === newList2.get(i)).toBeTruthy();
     }

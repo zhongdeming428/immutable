@@ -1,27 +1,21 @@
 import { NODE_SIZE, SHIFT } from './utils/constants';
 import { setNodeInTrie, getNodeInTrie, makeList, getTailOffset, OwnerID } from './utils/index';
 
-/**
- * TODO:
- * -  transients 优化: 在每个 trienode 上加 ownerID
- */
 export class TrieNode<T = unknown> {
   private nodeArr: Array<T | TrieNode<T>>;
   public ownerID: OwnerID;
-  constructor(arr?: Array<T | TrieNode<T>>) {
-    if (arr) {
-      this.nodeArr = arr.slice(0, NODE_SIZE);
-    } else {
-      this.nodeArr = [];
-    }
+
+  constructor(arr?: Array<T | TrieNode<T>>, ownerID?: OwnerID) {
+    this.nodeArr = arr && arr.slice(0, NODE_SIZE) || [];
+    this.ownerID = ownerID || new OwnerID();
   }
 
   public get length() {
     return this.nodeArr.length;
   }
 
-  clone(): TrieNode<T> {
-    return new TrieNode(this.nodeArr);
+  makeEditable(ownerID?: OwnerID): TrieNode<T> {
+    return this.ownerID === ownerID ? this : new TrieNode(this.nodeArr, ownerID);
   }
 
   set(idx: number, value: T | TrieNode<T>) {
@@ -68,33 +62,39 @@ export class TrieList<T = any> {
     if (idx < 0 || idx > this.length) return;
     const newLength = idx === this.length ? this.length + 1 : this.length;
     if (idx < this.tailOffset) {
-      const newRoot = setNodeInTrie<T>(this.root, idx, this.level, value);
-      const newList = makeList(newRoot, newLength, this.tail);
-      return newList;
+      const newRoot = setNodeInTrie<T>(this.root, idx, this.level, value, 0, this.__ownerID);
+      return makeList(newRoot, newLength, this.tail, this.__ownerID, this);
     } else {
       if ((this.tail?.length ?? 0) < NODE_SIZE) {
-        const newTail = this.tail?.clone() ?? new TrieNode();
+        const newTail = this.tail?.makeEditable(this.__ownerID) ?? new TrieNode([], this.__ownerID);
         newTail.set(idx - this.tailOffset, value);
-        const newList = makeList(this.root, newLength, newTail);
-        return newList;
+        return makeList(this.root, newLength, newTail, this.__ownerID, this);
       } else {
-        const newRoot = setNodeInTrie<T>(this.root, this.tailOffset, this.level, this.tail, 1);
-        const newList = makeList(newRoot, newLength);
+        const newRoot = setNodeInTrie<T>(this.root, this.tailOffset, this.level, this.tail, 1, this.__ownerID);
+        const newList = makeList(newRoot, newLength, null, this.__ownerID, this);
         return newList.set(idx, value);
       }
     }
   }
+
   pushBack(this: TrieList<T>, ...values: Array<T>): TrieList<T> {
     if (this.length > TrieList.maxSize) 
       throw new Error('Exceeded the max size of list!');
 
-    let newList = this;
-
-    for (let idx = 0; idx < values.length; idx++) {
-      const offset = idx + this.length;
-      newList = newList.set(offset, values[idx]);
+    if (!values || !values.length) {
+      return this;
     }
-    return newList;
+
+    if (values.length > 1) {
+      return this.withMutations(list => {
+        for (let idx = 0; idx < values.length; idx++) {
+          const offset = idx + this.length;
+          list.set(offset, values[idx]);
+        }
+      });
+    }
+
+    return this.set(this.length, values[0]);
   }
 
   removeBack(): TrieList<T> {
@@ -128,7 +128,7 @@ export class TrieList<T = any> {
     return this.__ownerID ? this : makeList(this.root, this.length, this.tail, new OwnerID());
   }
 
-  withMutations(fn: (list: TrieList) => TrieList) {
+  withMutations(fn: (list: TrieList) => void) {
     const mutable = this.asMutable();
     fn(mutable);
     if (!mutable.__altered) {
@@ -141,6 +141,6 @@ export class TrieList<T = any> {
     }
     return mutable.__ownerID === this.__ownerID ?
       mutable :
-      makeList(this.root, this.length, this.tail);
+      makeList(this.root, this.length, this.tail, this.__ownerID);
   }
 }
