@@ -7,6 +7,7 @@
     "@types/node": "^14.0.14",
     "benchmark": "^2.1.4",
     "jest": "^26.1.0",
+    "ts-node": "^9.0.0",
     "typescript": "^3.9.5"
   },
   "scripts": {
