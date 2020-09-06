@@ -13,7 +13,7 @@ push/pop 操作对比array测试结果,
 api,ops/sec
 array,451922408
 trielist,780909
-
+,
 v2 测试速度
 索引,ops/sec
 10,13787277
