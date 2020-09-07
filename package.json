@@ -23,6 +23,12 @@
       "utils/**"
     ],
     "coverageDirectory": ".coverage",
-    "coverageReporters": ["html", "text"]
+    "coverageReporters": [
+      "html",
+      "text"
+    ]
+  },
+  "dependencies": {
+    "immutable": "^4.0.0-rc.12"
   }
 }
